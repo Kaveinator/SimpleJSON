@@ -729,7 +729,13 @@ namespace SimpleJSON
 
         public override JSONNodeType Tag { get { return JSONNodeType.Array; } }
         public override bool IsArray { get { return true; } }
-        public override Enumerator GetEnumerator() { return new Enumerator(m_List.GetEnumerator()); }
+        public override Enumerator GetEnumerator() {
+            Dictionary<string, JSONNode> dict = new Dictionary<string, JSONNode>();
+            for (int i = 0; i < m_List.Count; i++)
+                dict.Add(i.ToString(), m_List[i]);
+            return new JSONNode.Enumerator(dict.GetEnumerator());
+            //return new Enumerator(AsObject.GetEnumeratorm_List.GetEnumerator()); 
+        }
 
         public override JSONNode this[int aIndex]
         {
@@ -1425,10 +1431,18 @@ namespace SimpleJSON
     // End of JSONLazyCreator
 
     public static class JSON
-    {
+    { // Helper methods
         public static JSONNode Parse(string aJSON)
-        {
-            return JSONNode.Parse(aJSON);
+            => JSONNode.Parse(aJSON);
+
+        public static bool TryParse(string aJSON, out JSONNode node) {
+            try {
+                node = JSONNode.Parse(aJSON);
+                return true;
+            } catch {
+                node = JSONNull.CreateOrGet();
+                return false;
+            }
         }
     }
 }
